@@ -386,8 +386,12 @@ class IncomingMessage(Message, AbstractIncomingMessage):
             self.__processed = True
 
     @property
+    def is_channel_closed(self) -> bool:
+        return self.__channel.is_closed
+
+    @property
     def channel(self) -> aiormq.abc.AbstractChannel:
-        if self.__channel.is_closed:
+        if self.is_channel_closed:
             raise ChannelInvalidStateError
         return self.__channel
 
@@ -566,7 +570,7 @@ class ProcessContext(AbstractProcessContext):
 
         if not self.ignore_processed or not self.message.processed:
             if self.reject_on_redelivered and self.message.redelivered:
-                if not self.message.channel.is_closed:
+                if not self.message.is_channel_closed:
                     log.info(
                         "Message %r was redelivered and will be rejected",
                         self.message,
@@ -579,7 +583,7 @@ class ProcessContext(AbstractProcessContext):
                     self.message,
                 )
             else:
-                if not self.message.channel.is_closed:
+                if not self.message.is_channel_closed:
                     await self.message.reject(requeue=self.requeue)
                     return
                 log.warning("Reject is not sent since channel is closed")

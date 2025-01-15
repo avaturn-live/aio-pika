@@ -36,7 +36,7 @@ packages = [{ include = "aio_pika" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-aiormq = "~6.8"
+aiormq = {git = "https://github.com/avaturn-live/aiormq.git"}
 yarl = [{ version = '*'}]
 exceptiongroup = "^1"
 typing-extensions = [{ version = '*', python = "< 3.10" }]

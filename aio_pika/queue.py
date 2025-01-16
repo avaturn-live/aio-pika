@@ -450,7 +450,8 @@ class QueueIterator(AbstractQueueIterator):
         del self._consumer_tag
 
         self._amqp_queue.close_callbacks.discard(self._on_close)
-        await self._amqp_queue.cancel(consumer_tag)
+        if not self._amqp_queue.channel.is_closed:
+            await self._amqp_queue.cancel(consumer_tag)
 
         log.debug("Queue iterator %r closed", self)
 

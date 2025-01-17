@@ -256,7 +256,7 @@ class Queue(AbstractQueue):
         self, consumer_tag: ConsumerTag,
         timeout: TimeoutType = None,
         nowait: bool = False,
-    ) -> aiormq.spec.Basic.CancelOk:
+    ) -> aiormq.spec.Basic.CancelOk | None:
         """ This method cancels a consumer. This does not affect already
         delivered messages, but it does mean the server will not send any more
         messages for that consumer. The client may receive an arbitrary number
@@ -274,6 +274,8 @@ class Queue(AbstractQueue):
         :return: Basic.CancelOk when operation completed successfully
         """
 
+        if self.channel.is_closed:
+            return
         channel = await self.channel.get_underlay_channel()
         return await channel.basic_cancel(
             consumer_tag=consumer_tag, nowait=nowait, timeout=timeout,
@@ -450,8 +452,7 @@ class QueueIterator(AbstractQueueIterator):
         del self._consumer_tag
 
         self._amqp_queue.close_callbacks.discard(self._on_close)
-        if not self._amqp_queue.channel.is_closed:
-            await self._amqp_queue.cancel(consumer_tag)
+        await self._amqp_queue.cancel(consumer_tag)
 
         log.debug("Queue iterator %r closed", self)
 

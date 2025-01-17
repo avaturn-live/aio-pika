@@ -322,7 +322,7 @@ class AbstractQueue:
         self, consumer_tag: ConsumerTag,
         timeout: TimeoutType = None,
         nowait: bool = False,
-    ) -> aiormq.spec.Basic.CancelOk:
+    ) -> aiormq.spec.Basic.CancelOk | None:
         raise NotImplementedError
 
     @overload
